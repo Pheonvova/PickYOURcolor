@@ -22,7 +22,7 @@ class ViewController: UIViewController {
     @IBOutlet var labelForGreen: UILabel!
     @IBOutlet var labelForBlue: UILabel!
     
-
+    
     @IBOutlet var valueOfRed: UILabel!
     @IBOutlet var valueOfGreen: UILabel!
     @IBOutlet var valueOfBlue: UILabel!
@@ -53,6 +53,29 @@ class ViewController: UIViewController {
         labelForGreen.textColor = .green
         labelForBlue.textColor = .blue
         
+        //Text fields setup
+        manualValueOfRed.delegate = self
+        manualValueOfGreen.delegate = self
+        ManualValueOfBlue.delegate = self
+        
+        manualValueOfRed.keyboardType = .numberPad
+        manualValueOfGreen.keyboardType = .numberPad
+        ManualValueOfBlue.keyboardType = .numberPad
+        
+        
+        
+        let toolbar = UIToolbar()
+        
+        manualValueOfRed.inputAccessoryView  = UIView()
+        manualValueOfGreen.inputAccessoryView = UIView()
+        ManualValueOfBlue.inputAccessoryView = UIView()
+        
+        let doneButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.done,
+                                         target: self,
+                                         action: #selector(self.doneClicked))
+        toolbar.setItems([doneButton], animated: true)
+        
+        
         
     }
     
@@ -70,7 +93,43 @@ class ViewController: UIViewController {
         manualValueOfRed.text = String(format: "%.2f", sliderForRedColor.value)
         manualValueOfGreen.text = String(format: "%.2f", sliderForGreenColor.value)
         ManualValueOfBlue.text = String(format: "%.2f", sliderForBlueColor.value)
+        
+        
     }
+    
+    @IBAction func textFieldsAditingOrEnd(_ sender: Any) {
+        
 
+        
+    }
+    
+    @objc func doneClicked(){
+        view.endEditing(true)
+    }
+    
 }
 
+
+
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case manualValueOfRed:
+            manualValueOfRed.resignFirstResponder()
+        case manualValueOfGreen:
+            manualValueOfGreen.resignFirstResponder()
+        case ManualValueOfBlue:
+            ManualValueOfBlue.resignFirstResponder()
+        default:
+            break
+        }
+        return true
+    }
+    
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        resignFirstResponder()
+        return true
+    }
+    
+
+}
