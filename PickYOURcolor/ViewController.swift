@@ -35,101 +35,147 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //Sliders setup
-        sliderForRedColor.minimumValue = 0
-        sliderForGreenColor.minimumValue = 0
-        sliderForBlueColor.minimumValue = 0
-        
-        sliderForRedColor.maximumValue = 1
-        sliderForGreenColor.maximumValue = 1
-        sliderForBlueColor.maximumValue = 1
-        
-        sliderForRedColor.minimumTrackTintColor = .red
-        sliderForGreenColor.minimumTrackTintColor = .green
-        sliderForBlueColor.minimumTrackTintColor = .blue
-        
-        //Labels setup
-        labelForRed.textColor = .red
-        labelForGreen.textColor = .green
-        labelForBlue.textColor = .blue
-        
-        //Text fields setup
-        manualValueOfRed.delegate = self
-        manualValueOfGreen.delegate = self
-        ManualValueOfBlue.delegate = self
-        
-        manualValueOfRed.keyboardType = .numberPad
-        manualValueOfGreen.keyboardType = .numberPad
-        ManualValueOfBlue.keyboardType = .numberPad
-        
-        
-        
-        let toolbar = UIToolbar()
-        
-        manualValueOfRed.inputAccessoryView  = UIView()
-        manualValueOfGreen.inputAccessoryView = UIView()
-        ManualValueOfBlue.inputAccessoryView = UIView()
-        
-        let doneButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.done,
-                                         target: self,
-                                         action: #selector(self.doneClicked))
-        toolbar.setItems([doneButton], animated: true)
-        
-        
-        
-    }
-    
-    @IBAction func sliderMoved(_ Sender: Any ) {
-        let redValue = CGFloat(sliderForRedColor.value)
-        let greenValue = CGFloat(sliderForGreenColor.value)
-        let blueValue = CGFloat(sliderForBlueColor.value)
-        
-        colorScreen.backgroundColor = UIColor(red: redValue, green: greenValue, blue: blueValue, alpha: 1)
-        
-        valueOfRed.text = String(format: "%.2f", sliderForRedColor.value)
-        valueOfGreen.text = String(format: "%.2f", sliderForGreenColor.value)
-        valueOfBlue.text = String(format: "%.2f", sliderForBlueColor.value)
-        
-        manualValueOfRed.text = String(format: "%.2f", sliderForRedColor.value)
-        manualValueOfGreen.text = String(format: "%.2f", sliderForGreenColor.value)
-        ManualValueOfBlue.text = String(format: "%.2f", sliderForBlueColor.value)
-        
-        
-    }
-    
-    @IBAction func textFieldsAditingOrEnd(_ sender: Any) {
-        
 
+
+        //Adding "Done" Button to keyboard
+        addDoneButtonTo(manualValueOfRed)
+        addDoneButtonTo(manualValueOfGreen)
+        addDoneButtonTo(ManualValueOfBlue)
+        
+        colorCreator()
+        textfieldedit()
+        changeValueInLabels()
         
     }
     
-    @objc func doneClicked(){
+    //Format float ro string with 2 digits after dot
+    private func sliderValueFormatter (valueFrom slider: UISlider) -> String {
+        let color = String(format: "%.2f", slider.value)
+        
+        return color
+    }
+    
+    //Changing value for values of colors in labels
+    private func changeValueInLabels () {
+        valueOfRed.text = sliderValueFormatter(valueFrom: sliderForRedColor)
+        valueOfGreen.text = sliderValueFormatter(valueFrom: sliderForGreenColor)
+        valueOfBlue.text = sliderValueFormatter(valueFrom: sliderForBlueColor)
+    }
+    
+    //Creating colors from Float values
+    func colorCreator(){
+        colorScreen.backgroundColor = UIColor(red: CGFloat(sliderForRedColor.value),
+                                              green: CGFloat(sliderForGreenColor.value),
+                                              blue: CGFloat(sliderForBlueColor.value),
+                                              alpha: 1)
+    }
+    
+    @IBAction func sliderMoved(_ sender: UISlider ) {
+        switch sender.tag {
+        case 0:
+            valueOfRed.text = sliderValueFormatter(valueFrom: sliderForRedColor)
+            manualValueOfRed.text = sliderValueFormatter(valueFrom: sliderForRedColor)
+        case 1:
+            valueOfGreen.text = sliderValueFormatter(valueFrom: sliderForRedColor)
+            manualValueOfGreen.text = sliderValueFormatter(valueFrom: sliderForGreenColor)
+        case 2:
+            valueOfBlue.text = sliderValueFormatter(valueFrom: sliderForBlueColor)
+            ManualValueOfBlue.text = sliderValueFormatter(valueFrom: sliderForBlueColor)
+        default:
+            break
+        }
+        colorCreator()
+        
+    }
+    
+    func textfieldedit () {
+        manualValueOfRed.text = sliderValueFormatter(valueFrom: sliderForRedColor)
+        manualValueOfGreen.text = sliderValueFormatter(valueFrom: sliderForGreenColor)
+        ManualValueOfBlue.text = sliderValueFormatter(valueFrom: sliderForBlueColor)
+    }
+    
+    func textFieldCheker (fieldToChek: UITextField)  {
+        guard let inputText = fieldToChek.text, !inputText.isEmpty else {  return   }
+        
+        if let inputText = Float(inputText) {
+            fieldToChek.text = String(inputText)
+            
+            switch fieldToChek.tag {
+            case 0: sliderForRedColor.value = inputText
+            case 1: sliderForGreenColor.value = inputText
+            case 2: sliderForBlueColor.value = inputText
+            default: break
+            }
+            
+            colorCreator()
+            changeValueInLabels()
+        } else {
+            fieldToChek.text = "!"
+        }
+    }
+}
+
+extension ViewController: UITextFieldDelegate {
+    
+    // Скрываем клавиатуру нажатием на "Done"
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    // Скрытие клавиатуры по тапу за пределами Text View
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        
+        view.endEditing(true) // Скрывает клавиатуру, вызванную для любого объекта
+    }
+    
+    func textFieldDidEndEditing(_ inputText: UITextField) {
+        guard let text = inputText.text else {  return   }
+        
+        if let valueOfColor = Float(text) {
+            
+            switch inputText.tag {
+            case 0: sliderForRedColor.value = valueOfColor
+            case 1: sliderForGreenColor.value = valueOfColor
+            case 2: sliderForBlueColor.value = valueOfColor
+            default: break
+            }
+            
+            colorCreator()
+            changeValueInLabels()
+        } else {
+            inputText.text = ""
+        }
+    }
+}
+
+
+extension ViewController {
+
+    
+    
+    private func addDoneButtonTo(_ textField: UITextField) {
+        
+        let toolbarDone = UIToolbar()
+        toolbarDone.sizeToFit()
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
+        
+        let flexibleDone = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+                                           target: nil,
+                                           action: nil)
+        
+        toolbarDone.items = [doneButton, flexibleDone]
+        
+        
+    }
+    
+    @objc private func didTapDone() {
+        view.endEditing(true)
+    }
+    @objc func dismissKeyboard() {
         view.endEditing(true)
     }
     
 }
 
-
-
-extension ViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        switch textField {
-        case manualValueOfRed:
-            manualValueOfRed.resignFirstResponder()
-        case manualValueOfGreen:
-            manualValueOfGreen.resignFirstResponder()
-        case ManualValueOfBlue:
-            ManualValueOfBlue.resignFirstResponder()
-        default:
-            break
-        }
-        return true
-    }
-    
-    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        resignFirstResponder()
-        return true
-    }
-    
-
-}
